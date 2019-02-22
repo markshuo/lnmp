@@ -1,0 +1,39 @@
+version: "2"
+services:
+    mysql:
+        build : ./mysql #使用Dockerfile文件
+        #image: docker.io/mysql:5.7.21
+        container_name: mysql
+        environment:
+            MYSQL_ROOT_PASSWORD: 123456
+        ports:
+            - "3306:3306"
+        volumes:
+            - ~/www/docker/mysql:/var/lib/mysql
+    php-fpm:
+        #image: docker.io/php:7.2-fpm
+        build : ./php
+        container_name: php
+        #links:
+        #   - db_server:mysql
+        depends_on :
+            - mysql
+        ports:
+            - "9000:9000"
+        volumes:
+            - ~/www/html:/usr/share/nginx/html
+            - ~/www/docker/php:/usr/local/etc/php
+    nginx:
+        #image: docker.io/nginx
+        build : ./nginx
+        container_name: nginx
+        #links:
+        #    - php-fpm:php
+        depends_on :
+            - php-fpm
+        ports:
+            - "80:80"
+            - "443:443"
+        volumes:
+            - ~/www/html:/usr/share/nginx/html
+            - ~/www/docker/nginx:/etc/nginx
