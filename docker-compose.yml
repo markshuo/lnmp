@@ -10,6 +10,7 @@ services:
             - "3306:3306"
         volumes:
             - ~/www/docker/mysql:/var/lib/mysql
+        #--restart always  当容器退出或宿主机重启的时候，容器接着会始终重启    
     php-fpm:
         #image: docker.io/php:7.2-fpm
         build : ./php
