@@ -1,0 +1,265 @@
+docker 安装 docker pull docker.elastic.co/elasticsearch/elasticsearch:6.6.0
+
+docker run --privileged --cap-add SYS_ADMIN -e container=docker -it --name centos_elk -p 9200:9200 -p 5601:5601  -d  centos_elk /bin/bash
+docker exec -it centos_elk /bin/bash
+
+
+
+#启动elasticsearch
+./bin/elasticsearch
+
+作为守护进程编辑运行
+要将Elasticsearch作为守护程序运行，请-d在命令行中指定，并使用以下-p选项将进程ID记录在文件中：
+
+./bin/elasticsearch -d -p pid
+可以在$ES_HOME/logs/目录中找到日志消息。
+
+要关闭Elasticsearch，请终止pid文件中记录的进程ID ：
+pkill -F pid
+
+
+编辑config/elasticsearch.yml:
+
+cluster.name: elastic-app
+node.name: ${HOSTNAME} //节点名称
+
+path.logs: /var/log/elasticsearch
+path.data: /var/data/elasticsearch
+network.hosts 0.0.0.0
+http.port 9200
+
+
+
+
+#是否启动
+curl localhost:9200
+
+#查看当前节点的所有 Index
+$ curl -X GET 'http://localhost:9200/_cat/indices?v'
+
+
+
+
+
+
+#每个 Index 所包含的 Type
+$ curl 'localhost:9200/_mapping?pretty=true'
+
+中文分词插件    
+./bin/elasticsearch-plugin install https://github.com/medcl/elasticsearch-analysis-ik.git
+
+#操作数据
+
+curl -X PUT 'localhost:9200/accounts' -d '{  "mappings": {    "person": {"properties": {"user": {  "type": "text",  "analyzer": "ik_max_word",  "search_analyzer": "ik_max_word"},"title": {  "type": "text",  "analyzer": "ik_max_word",  "search_analyzer": "ik_max_word"},"desc": {  "type": "text",  "analyzer": "ik_max_word",  "search_analyzer": "ik_max_word"}}    }  }}
+curl -X PUT 'localhost:9200/accounts' -d '{  "mappings": {    "person": {"properties": {"user": {  "type": "text",  "analyzer": "ik_max_word",  "search_analyzer": "ik_max_word"},"title": {  "type": "text",  "analyzer": "ik_max_word",  "search_analyzer": "ik_max_word"},"desc": {  "type": "text",  "analyzer": "ik_max_word",  "search_analyzer": "ik_max_word"}}    }  }}'
+curl -X PUT 'localhost:9200/accounts' -d '{  "mappings": {    "person": {"properties": {"user": {  "type": "text",  "analyzer": "ik_max_word",  "search_analyzer": "ik_max_word"},"title": {  "type": "text",  "analyzer": "ik_max_word",  "search_analyzer": "ik_max_word"},"desc": {  "type": "text",  "analyzer": "ik_max_word",  "search_analyzer": "ik_max_word"}}    }  }}'
+curl -H "Content-Type: application/json" -X PUT 'localhost:9200/accounts' -d '{  "mappings": {    "person": {"properties": {"user": {  "type": "text",  "analyzer": "ik_max_word",  "search_analyzer": "ik_max_word"},"title": {  "type": "text",  "analyzer": "ik_max_word",  "search_analyzer": "ik_max_word"},"desc": {  "type": "text",  "analyzer": "ik_max_word",  "search_analyzer": "ik_max_word"}}    }  }}'
+curl -H "Content-Type: application/json" -X POST 'localhost:9200/accounts' -d '{  "mappings": {    "person": {"properties": {"user": {  "type": "text",  "analyzer": "ik_max_word",  "search_analyzer": "ik_max_word"},"title": {  "type": "text",  "analyzer": "ik_max_word",  "search_analyzer": "ik_max_word"},"desc": {  "type": "text",  "analyzer": "ik_max_word",  "search_analyzer": "ik_max_word"}}    }  }}'
+curl 'localhost:9200/_mapping?pretty=true'
+curl -H "Content-Type: application/json" -X POST 'localhost:9200/accounts' -d '{  "mappings": {    "person": {"properties": {"user": {  "type": "text",  "analyzer": "ik_max_word",  "search_analyzer": "ik_max_word"},"title": {  "type": "text",  "analyzer": "ik_max_word",  "search_analyzer": "ik_max_word"},"desc": {  "type": "text",  "analyzer": "ik_max_word",  "search_analyzer": "ik_max_word"}}    }  }}'
+curl -H "Content-Type: application/json" -X PUT 'localhost:9200/accounts' -d '{  "mappings": {    "person": {"properties": {"user": {  "type": "text",  "analyzer": "ik_max_word",  "search_analyzer": "ik_max_word"},"title": {  "type": "text",  "analyzer": "ik_max_word",  "search_analyzer": "ik_max_word"},"desc": {  "type": "text",  "analyzer": "ik_max_word",  "search_analyzer": "ik_max_word"}}    }  }}'
+curl -H "Content-Type: application/json" -X PUT 'localhost:9200/accounts' -d '{"mappings": { "person": {"properties": {"user": {"type": "text","analyzer": "ik_max_word","search_analyzer": "ik_max_word"},"title": {"type": "text","analyzer": "ik_max_word","search_analyzer": "ik_max_word"},"desc": {"type": "text","analyzer": "ik_max_word","search_analyzer": "ik_max_word"}}}}}'
+curl -H "Content-Type: application/json" -X PUT 'localhost:9200/accounts' -d '{  "mappings": {    "person": {"properties": {"user": {  "type": "text",  "analyzer": "ik_max_word",  "search_analyzer": "ik_max_word"},"title": {  "type": "text",  "analyzer": "ik_max_word",  "search_analyzer": "ik_max_word"},"desc": {  "type": "text",  "analyzer": "ik_max_word",  "search_analyzer": "ik_max_word"}}    }  }}'
+curl -H "Content-Type:application/json" -X PUT 'localhost:9200/accounts' -d '{  "mappings": {    "person": {"properties": {"user": {  "type": "text",  "analyzer": "ik_max_word",  "search_analyzer": "ik_max_word"},"title": {  "type": "text",  "analyzer": "ik_max_word",  "search_analyzer": "ik_max_word"},"desc": {  "type": "text",  "analyzer": "ik_max_word",  "search_analyzer": "ik_max_word"}}    }  }}'
+curl -X PUT 'localhost:9200/accounts/person/1' -d '{  "user": "张三",  "title": "工程师",  "desc": "数据 库管理"}'
+curl -H "Content-Type:application/json" -X PUT 'localhost:9200/accounts/person/1' -d '{  "user": "张三",  "title": "工程师",  "desc": "数据库管理"}'
+curl 'localhost:9200/_mapping?pretty=true'
+curl -H "Content-Type:application/json" -X PUT 'localhost:9200/accounts' -d '{  "mappings": {    "person": {"properties": {"user": {  "type": "text",  "analyzer": "ik_max_word",  "search_analyzer": "ik_max_word"},"title": {  "type": "text",  "analyzer": "ik_max_word",  "search_analyzer": "ik_max_word"},"desc": {  "type": "text",  "analyzer": "ik_max_word",  "search_analyzer": "ik_max_word"}}    }  }}'
+curl 'localhost:9200/_mapping?pretty=true'
+curl -H "Content-Type:application/json" -X PUT 'localhost:9200/accounts/person/1' -d '{  "user": "张三",  "title": "工程师",  "desc": "数据库管理"}'
+curl 'localhost:9200/_mapping?pretty=true'
+curl -X POST 'localhost:9200/accounts/person' -d '{  "user": "李四",  "title": "工程师",  "desc": "系统管理"}'
+curl -H "Content-Type:application/json" -X POST 'localhost:9200/accounts/person' -d '{  "user": "李四",  "title": "工程师",  "desc": "系统管理"}'
+curl 'localhost:9200/accounts/person/1?pretty=true'
+curl 'localhost:9200/accounts/person/1'
+curl 'localhost:9200/accounts/person/1?pretty=true'
+curl 'localhost:9200/accounts/person/2?pretty=true'
+curl -H "Content-Type:application/json" -X PUT 'localhost:9200/accounts/person/1' -d '{  "user": "张三",  "title": "工程师",  "desc": "数据库管理,软件开发"}'
+curl 'localhost:9200/accounts/person/1?pretty=true'
+
+
+
+#查询所有的INDEX数据
+curl 'localhost:9200/accounts/person/_search'
+返回值：
+{
+  "took" : 1,
+  "timed_out" : false,
+  "_shards" : {
+    "total" : 5,
+    "successful" : 5,
+    "skipped" : 0,
+    "failed" : 0
+  },
+  "hits" : {
+    "total" : 44,
+    "max_score" : 1.0,
+    "hits" : [
+      {
+        "_index" : "ktsee_index",
+        "_type" : "doc",
+        "_id" : "4360",
+        "_score" : 1.0,
+        "_source" : {
+          "cat_id" : 130,
+          "brand_id" : 170,
+          "keywords" : "三木|CD|镜架|A 款式一",
+          "goods_id" : 4360,
+          "@timestamp" : "2019-02-12T06:06:01.105Z",
+          "goods_name" : "三木HSJ-镜架A",
+          "@version" : "1",
+          "type" : "ktsee_type"
+        }
+      }
+    }
+}	  
+took:			字段表示该操作的耗时（单位为毫秒），
+timed_out:		字段表示是否超时，
+hits:			字段表示命中的记录，里面子字段的含义如下。
+total：			返回记录数，本例是44条。
+max_score：		最高的匹配程度，本例是1.0。
+hits：			返回的记录组成的数组。
+每条记录都有一个_score字段，表示匹配的程序，默认是按照这个字段降序排列	
+
+#删除
+curl -X DELETE 'localhost:9200/ktsee_index/'
+
+#搜索
+curl 'localhost:9200/accounts/person/_search'  -d '{  "query" : { "match" : { "desc" : "软件" }}}'
+curl -H "Content-Type: application/json" 'localhost:9200/accounts/person/_search'  -d '{  "query" : { "match" : { "desc" : "软件" }}}'
+  
+curl -H "Content-Type: application/json" 'localhost:9200/accounts/person/_search'  -d '
+{
+  "query" : { "match" : { "desc" : "管理" }}
+}'
+
+如果有多个搜索关键字， Elastic 认为它们是or关系。
+curl -H "Content-Type: application/json" 'localhost:9200/accounts/person/_search'  -d '
+{
+  "query" : { "match" : { "desc" : "软件 管理" }}
+}'
+
+curl -H "Content-Type: application/json" 'localhost:9200/accounts/person/_search'  -d '
+{
+  "query": {
+    "bool": {
+"must": [
+{ "match": { "desc": "软件" } },
+{ "match": { "desc": "系统" } }
+]
+    }
+  }
+}'
+
+
+mysql数据导入
+
+1.https://www.elastic.co/下载LogStash 解压
+
+2.安装logstash-input-jdbc插件 到bin下执行：./logstash-plugin install logstash-input-jdbc
+
+3.新建/bin/sksee/jdbc.conf jdbc.sql 
+编辑jdbc.conf:
+input {
+  stdin {
+  }
+  jdbc {
+  # mysql jdbc connection string to our backup databse  后面的ktsee对应mysql中的test数据库
+  jdbc_connection_string => "jdbc:mysql://47.92.135.11:3306/fx_server"
+  # the user we wish to excute our statement as
+  jdbc_user => "fxrootroot"
+  jdbc_password => "fxrootroot123qweQWE"
+  # the path to our downloaded jdbc driver 这里需要设置正确的 mysql-connector-java-5.1.38.jar 路径，下载地址：https://dev.mysql.com/downloads/connector/j/5.1.html
+  jdbc_driver_library => "/usr/local/logstash-6.6.0/bin/mysql-connector-java-5.1.47/mysql-connector-java-5.1.47.jar"
+  # the name of the driver class for mysql
+  jdbc_driver_class => "com.mysql.jdbc.Driver"
+  jdbc_paging_enabled => "true"
+  jdbc_page_size => "50000"
+# 以下对应着要执行的sql的绝对路径
+  statement_filepath => "jdbc.sql"
+# 定时字段 各字段含义（由左至右）分、时、天、月、年，全部为*默认含义为每分钟都更新
+  schedule => "* * * * *"
+# 设定ES索引类型
+  type => "ktsee_type"
+  }
+}
+filter {
+  json {
+	  source => "message"
+	  remove_field => ["message"]
+  }
+}
+output {
+  elasticsearch {
+#ESIP地址与端口
+  hosts => "localhost:9200"
+#ES索引名称（自己定义的）
+  index => "ktsee_index"
+#自增ID编号
+  document_id => "%{id}"
+  }
+  stdout {
+#以JSON格式输出
+  codec => json_lines
+  }
+}
+4.编写jdbc.sql:
+select * from goods;
+5.检测配置文件是否正确  ./bin/logstash -f bin/ktsee/jdbc.conf -t
+返回Using config.test_and_exit mode. Config Validation Result: OK. Exiting Logstash 表示正常
+6. 执行 ./bin/logstash -f bin/ktsee/jdbc.conf
+
+
+
+
+
+input {
+  stdin {
+  }
+  jdbc {
+	  jdbc_connection_string => "jdbc:mysql://47.92.135.11:3306/fx_server"
+	  # the user we wish to excute our statement as
+	  jdbc_user => "fxrootroot"
+	  jdbc_password => "fxrootroot123qweQWE"
+	  jdbc_driver_library => "/usr/local/logstash-6.6.0/bin/mysql-connector-java-5.1.47/mysql-connector-java-5.1.47.jar"
+	  # the name of the driver class for mysql
+	  jdbc_driver_class => "com.mysql.jdbc.Driver"
+	  jdbc_paging_enabled => "true"
+	  jdbc_page_size => "50000"
+	  statement_filepath => "/usr/local/logstash-6.6.0/bin/ktsee/jdbc.sql"
+	  schedule => "* * * * *"
+	  type => "ktsee_type"
+  }
+}
+filter {
+  json {
+          source => "message"
+          remove_field => ["message"]
+  }
+}
+output {
+  elasticsearch {
+	  hosts => "localhost:9200"
+	  index => "ktsee_index"
+	  document_id => "%{id}"
+  }
+ stdout {
+#  codec => json_lines
+#  }
+}
+
+7.使用Elasticsearch的官方PHP库Elasticsearch-PHP:
+在 composer.json 文件中引入 elasticsearch-php：
+{
+    "require": {
+        "elasticsearch/elasticsearch": "~6.0"
+    }
+}
+composer update elasticsearch/elasticsearch:~6.0
+***项目新安装包最好使用方式： composer require "elasticsearch/elasticsearch:~6.0" （composer update 必须要添加包名,否则将更新所有）
+
+
+Kibana 使用
+docker 安装 docker pull docker.elastic.co/kibana/kibana:6.6.0
+1.下载Kibana -> 解压
+2.安装(Sense在高版本中已经集成，不再需要安装)
