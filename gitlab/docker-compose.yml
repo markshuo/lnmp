@@ -30,3 +30,5 @@ services:
         - /opt/gitlab/config:/etc/gitlab
         - /opt/gitlab/data:/var/opt/gitlab
         - /opt/gitlab/logs:/var/log/gitlab
+        
+        

@@ -1,9 +1,19 @@
 docker pull gitlab/gitlab-ce
 
-docker run -d -h gitlab -p 8443:443 -p 8081:80  -p 2222:22 --name gitlab --restart always  -v /opt/gitlab/config:/etc/gitlab -v /opt/gitlab/logs:/var/log/gitlab -v  /opt/gitlab/data:/var/opt/gitlab  gitlab/gitlab-ce
+docker run  -p 8443:443 -p 8081:80  -p 2222:22 --name gitlab --restart always  -v /opt/gitlab/config:/etc/gitlab -v /opt/gitlab/logs:/var/log/gitlab -v  /opt/gitlab/data:/var/opt/gitlab -d gitlab/gitlab-ce
 
 #--restart always  当容器退出或宿主机重启的时候，容器接着会始终重启
 
 docker run --name gitlab -p 8443:443 -p 8081:80  -p 2222:22  -v /opt/gitlab/config:/etc/gitlab -v /opt/gitlab/logs:/var/log/gitlab -v  /opt/gitlab/data:/var/opt/gitlab -d gitlab/gitlab-ce
 
+#进入容器
 
+#初始化服务
+gitlab-ctl reconfigure
+
+#重置密码
+gitlab-rails console production
+user = User.where(username: 'root').first
+user.password = 'ma123456'
+user.password_confirmation='ma123456'
+user.save
