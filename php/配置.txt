@@ -1,0 +1,165 @@
+Skip to content
+ 
+Search or jump to…
+
+Pull requests
+Issues
+Marketplace
+Explore
+ 
+@markshuo Sign out
+1
+0 0 markshuo/docker
+ Code  Issues 0  Pull requests 0  Projects 0  Wiki  Insights  Settings
+docker/lnmp
+@markshuo markshuo Rename LNMP to lnmp
+0b283e5 27 days ago
+130 lines (123 sloc)  5.18 KB
+    
+#安装LNMP
+
+1.php
+  docker pull php:lastes
+  docker run -d -p 9000:9000 --name php  php:7.1-fpm
+2.php的扩展配置
+  为了保证 Docker 镜像尽量小，PHP 的源文件是以压缩包的形式存在镜像中，官方提供了 docker-php-source 快捷脚本，用于对源文件压缩包的解压（extract）及解压后的文件进行删除（delete）的操作。
+  ①源码编译安装
+    *********************************
+    FROM php:7.1-apache
+    RUN docker-php-source extract \
+      # 此处开始执行你需要的操作 \
+      && docker-php-source delete
+    *********************************
+  ②安装扩展
+    a.核心扩展
+      官方提供的 docker-php-ext-configure 和 docker-php-ext-install 快捷脚本：
+      *********************************
+      FROM php:7.1-fpm
+      RUN yum update \
+          # 相关依赖必须手动安装
+          && yum install -y \
+              libfreetype6-dev \
+              libjpeg62-turbo-dev \
+              libmcrypt-dev \
+              libpng-dev \
+          # 安装扩展
+          && docker-php-ext-install -j$(nproc) iconv mcrypt \
+          # 如果安装的扩展需要自定义配置时
+          && docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ \
+          && docker-php-ext-install -j$(nproc) gd
+          ---------------------------------------------
+                  进入php容器docker exec -it php /bash/bin
+                  执行 docker-php-ext-install pdo pdo_mysql
+                  如果报  /usr/local/bin/docker-php-ext-enable: cannot create /usr/local/etc/php/conf.d/docker-php-ext-pdo_mysql.ini: Directory nonexistent    
+                  解决方案：
+                     直接在/usr/local/etc/php目录下面新建 conf.d目录和对应的docker-php-ext-pdo_msql.ini文件
+                  其中docker-php-ext-pdo_msql.ini的内容为：
+                  extension=pdo_mysql.so
+          ---------------------------------------------
+      *********************************
+    b.PECL 扩展
+      因为一些扩展并不包含在 PHP 源码文件中，所有需要使用 PECL（PHP 的扩展库仓库，通过 PEAR 打包）。用 pecl install 安装扩展，然后再用官方提供的 docker-php-ext-enable 快捷脚本来启用扩展，如下示例：
+      *********************************
+      FROM php:7.1-fpm
+      RUN yum update \
+          # 手动安装依赖
+          && yum install -y libmemcached-dev zlib1g-dev \
+          # 安装需要的扩展
+         && pecl install memcached-2.2.0 \
+         # 启用扩展
+         && docker-php-ext-enable memcached
+      *********************************
+     c.其它扩展
+        既不在 PHP 源码包，也不再 PECL 扩展仓库中的扩展，可以通过下载扩展程序源码，编译安装的方式安装：
+        FROM php:7.1-apache
+        RUN curl -fsSL 'https://xcache.lighttpd.net/pub/Releases/3.2.0/xcache-3.2.0.tar.gz' -o xcache.tar.gz \
+            && mkdir -p xcache \
+            && tar -xf xcache.tar.gz -C xcache --strip-components=1 \
+            && rm xcache.tar.gz \
+            && ( \
+                cd xcache \
+                && phpize \
+                && ./configure --enable-xcache \
+                && make -j$(nproc) \
+                && make install \
+            ) \
+            && rm -r xcache \
+            && docker-php-ext-enable xcache
+            *********************************
+            FROM php:5.6-apache
+            RUN curl -fsSL 'https://xcache.lighttpd.net/pub/Releases/3.2.0/xcache-3.2.0.tar.gz' -o xcache.tar.gz \
+                && mkdir -p /tmp/xcache \
+                && tar -xf xcache.tar.gz -C /tmp/xcache --strip-components=1 \
+                && rm xcache.tar.gz \
+                && docker-php-ext-configure /tmp/xcache --enable-xcache \
+                && docker-php-ext-install /tmp/xcache \
+                && rm -r /tmp/xcache
+            *********************************
+            
+   安装swoole
+	a.下载https://github.com/swoole/swoole-src/releases
+	b.docker cp 复制到容器
+	c.phpize->./configure->make&&make install -> docker-php-ext-enable swoole
+	
+	
+2.nginx
+docker pull nginx 
+docker run --name nginx -p 8080:80  -v ~/www/html:/usr/share/nginx/html -v ~/www/docker/nginx:/etc/nginx/ -d nginx
+docker cp nginx:/etc/nginx .
+复制容器的 html、 /etc/nginx 到当前服务器位置
+
+3.mysql
+  docker pull mysql 
+  
+ 4.使用docker-compose编排容器
+ 
+  安装docker-compose:
+    sudo curl -L "https://github.com/docker/compose/releases/download/1.23.2/docker-compose > /usr/local/bin/docker-compose
+    chmod u+x docker-compose
+    docker-compose version
+    *****
+    docker-compose.yml:
+db_server:
+    image: docker.io/mysql:5.7.21
+    container_name: mysql
+    environment:
+        MYSQL_ROOT_PASSWORD: 123456
+    ports:
+        - "3306:3306"
+    volumes:
+        - ~/www/docker/mysql:/var/lib/mysql
+php-fpm:
+    image: docker.io/php:7.2-fpm
+    container_name: php
+    links:
+        - db_server:mysql
+    ports:
+        - "9000:9000"
+    volumes:
+        - ~/www/html:/usr/share/nginx/html
+        - ~/www/docker/php:/usr/local/etc/php
+web_server:
+    image: docker.io/nginx
+    container_name: nginx
+    links:
+        - php:php
+    ports:
+        - "80:80"
+        - "443:443"
+    volumes:
+        - ~/www/html:/usr/share/nginx/html
+        - ~/www/docker/nginx:/etc/nginx
+  
+  %遇到的坑： File not found.  php-fpm和nginx指定目录要一致
+© 2019 GitHub, Inc.
+Terms
+Privacy
+Security
+Status
+Help
+Contact GitHub
+Pricing
+API
+Training
+Blog
+About

@@ -17,3 +17,10 @@ user = User.where(username: 'root').first
 user.password = 'ma123456'
 user.password_confirmation='ma123456'
 user.save
+
+
+
+新建项目
+1.新建项目
+2.添加SSH Keys
+3.
