@@ -25,7 +25,7 @@ RUN apt-get update && apt-get install -y \
 	&& docker-php-ext-enable redis \
 	#安装mysql扩展
 	&& docker-php-ext-install pdo_mysql \
-	#安装swoole1.10.1
+	#安装swoole-src-4.3.1
 	&& tar -xzf /tmp/swoole-src-4.3.1.tar.gz -C /usr/src/swoole --strip-components=1 \
 	&& phpize \
 	&& ./configure \
